@@ -2,6 +2,14 @@ const XLSX = require("xlsx");
 const { licencias } = require("./licencias-conductores-data");
 const readline = require("readline");
 
+// Indicativos de cada empresa
+const taxSuper = "2"
+const ctm = "3"
+const taxAntioquia = "4"
+const taxAndaluz = "5"
+const taxBelen = "6"
+const taxPoblado = "7"
+
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
