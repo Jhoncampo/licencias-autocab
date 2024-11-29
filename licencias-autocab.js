@@ -1,14 +1,15 @@
 const XLSX = require("xlsx");
 const { licencias } = require("./licencias-conductores-data");
 const readline = require("readline");
+const { conductoresData } = require("./conductores-data");
 
 // Indicativos de cada empresa
-const taxSuper = "2"
-const ctm = "3"
-const taxAntioquia = "4"
-const taxAndaluz = "5"
-const taxBelen = "6"
-const taxPoblado = "7"
+const taxSuper = "2";
+const ctm = "3";
+const taxAntioquia = "4";
+const taxAndaluz = "5";
+const taxBelen = "6";
+const taxPoblado = "7";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -22,7 +23,8 @@ function showMenu() {
     1. Ver licencias activas
     2. Moviles que no han ingresado en los ultimos 15 días
     3. Generar archivo excel licencias activas
-    4. Salir
+    4. Ver todos los conductores CTM
+    0. Salir
   `);
 
   rl.question("Escribe el número de la opción: ", (answer) => {
@@ -37,6 +39,9 @@ function showMenu() {
         exportarExcel();
         break;
       case "4":
+        conductores();
+        break;
+      case "0":
         console.log("Adiós!");
         rl.close();
         return;
@@ -44,9 +49,8 @@ function showMenu() {
         console.log("Opción no válida. Inténtalo de nuevo.");
     }
     if (licencias.length === 0) {
-      rl.close()
-    }else{
-
+      rl.close();
+    } else {
       showMenu();
     }
   });
@@ -145,3 +149,48 @@ const exportarExcel = () => {
     console.log("Excel exportado con exito");
   }
 };
+
+const conductores = () => {
+  if (licencias.length === 0 || conductoresData.length === 0) {
+    return console.log(
+      "--[ No hay licencias o conductores para comparar. Por favor ingrese los datos. ]--"
+    );
+  }
+
+  let count = 0;
+
+  const licenciasActivas = licencias.filter(
+    (licencia) =>
+      licencia.isRegistered === true &&
+      (licencia.mdtID.toString().startsWith("3") || 
+      (licencia.mdtID.toString().includes("-")))  
+  );
+
+  const coincidencias = [];
+
+  licenciasActivas.forEach((licencia) => {
+    conductoresData.forEach((conductor) => {
+      
+      if (
+        licencia.mdtID == conductor.callsign && 
+        licencia.userName === conductor.email 
+      ) {
+
+        console.log(licencia.mdtID, " - ", conductor.callsign)
+        coincidencias.push({
+          conductorNombre: `${conductor.forename} ${conductor.surname}`,
+          conductorEmail: conductor.email,
+          licenciaMdtID: licencia.mdtID,
+          licenciaEmail: licencia.userName,
+          ultimaFechaLogin: licencia.lastLogOn, 
+          celular: conductor.mobile,
+        });
+        count += 1;
+      }
+    });
+  });
+
+  console.log(`Cantidad de coincidencias encontradas: ${count}`);
+
+};
+
